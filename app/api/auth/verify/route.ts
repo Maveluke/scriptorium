@@ -1,6 +1,7 @@
 import { verifyAccessToken } from "@/utils/auth";
 import { cookies } from "next/headers";
 import { prisma } from "@/utils/db";
+import { TokenPayload, TokenVerification, User } from "@/app/types/auth";
 
 export async function GET() {
     try {
@@ -18,7 +19,7 @@ export async function GET() {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: result.decoded?.id },
+            where: { id: (result.decoded ? (result.decoded as TokenPayload)?.id : undefined) },
             select: {
                 id: true,
                 username: true,

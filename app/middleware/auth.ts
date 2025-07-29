@@ -6,9 +6,9 @@ import { verifyAccessToken } from '../../utils/auth';
 import { TokenVerification } from '@/app/types/auth';
 
 export async function authorize(
-  req: NextRequest, 
-  roles: string[] = [], 
-  owner: number | null = -1
+    req: NextRequest,
+    roles: string[] = [],
+    owner: number | null = -1
 ): Promise<boolean> {
     if (typeof roles === 'string') roles = [roles] as string[];
 
@@ -18,11 +18,11 @@ export async function authorize(
     }
 
     try {
-        const verification: TokenVerification | null = verifyAccessToken(authorizationHeader);
+        const verification: TokenVerification | null = verifyAccessToken(authorizationHeader) as TokenVerification;
         if (!verification || (!verification.valid && verification.reason === "Invalid token.")) {
             throw new UnauthorizedError("Invalid token");
         }
-        else if(!verification.valid && verification.reason === "Token has expired.") {
+        else if (!verification.valid && verification.reason === "Token has expired.") {
             throw new UnauthorizedError("Token has expired");
         }
 

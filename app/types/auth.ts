@@ -27,3 +27,10 @@ export interface TokenPayload {
   username?: string;
   exp?: number;
 }
+
+export interface TokenError {
+  valid: false;
+  reason: string;
+}
+
+export type TokenVerificationResult = TokenVerification | TokenError | null;

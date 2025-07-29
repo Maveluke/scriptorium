@@ -20,12 +20,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   try {
-    const verification: TokenVerification | null = verifyRefreshToken(refreshToken.value);
+    const verification: TokenVerification | null = verifyRefreshToken(refreshToken.value) as TokenVerification;
 
     if (!verification || (!verification.valid && verification.reason === "Invalid token.")) {
       return Response.json({ status: "error", message: 'Invalid refresh token' }, { status: 401 });
     }
-    else if(!verification.valid && verification.reason === "Token has expired.") {
+    else if (!verification.valid && verification.reason === "Token has expired.") {
       return Response.json({ status: "error", message: 'Expired refresh token' }, { status: 401 });
     }
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         message: "Login successful",
         user: { id, username, role },
         'access-token': newAccessToken,
-      }, 
+      },
       {
         status: 200,
         headers: new Headers({

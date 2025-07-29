@@ -2,7 +2,7 @@ import Docker from 'dockerode';
 import path from 'path';
 import fs from 'fs';
 
-const docker = new Docker({ 
+const docker = new Docker({
     socketPath: '/var/run/docker.sock'
 });
 const TIME_LIMIT = 20000;
@@ -28,7 +28,7 @@ const generateFileName = (language) => {
 const languageConfigs = {
     python: {
         image: 'python:3-alpine',
-        cmd: (filename, input) => input 
+        cmd: (filename, input) => input
             ? ['sh', '-c', `echo "${input}" | python3 ${filename}`]
             : ['python3', filename],
     },
@@ -71,8 +71,8 @@ const languageConfigs = {
     typescript: {
         image: 'node:alpine',
         cmd: (filename, input) => [
-            'sh', 
-            '-c', 
+            'sh',
+            '-c',
             `npm install -g typescript && \
              echo "$(cat /code/${filename})" > code.ts && \
              tsc code.ts && \
@@ -111,7 +111,7 @@ const getContainerLogs = async (container) => {
         stderr: true,
         follow: true,
     });
-    
+
     return new Promise((resolve) => {
         let output = '';
         logs.on('data', (chunk) => output += chunk);
