@@ -2,14 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ErrorBox from '@/app/components/ErrorBox';
+import {
+    TextField,
+    Button,
+    Typography,
+    Paper,
+    Box,
+    Alert,
+    IconButton,
+    CircularProgress,
+    InputAdornment,
+} from '@mui/material';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "@/app/contexts/ThemeContext";
 import Link from 'next/link';
 
 export interface UserAuthData {
-  username: string;
-  id: string;
-  role: string;
+    username: string;
+    id: string;
+    role: string;
 }
 
 export default function Login() {
@@ -17,7 +29,9 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { accessToken, setAccessToken, setUser } = useAuth();
+    const { theme } = useTheme();
     const router = useRouter();
 
     useEffect(() => {
@@ -67,67 +81,242 @@ export default function Login() {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
-        <div className="flex justify-center items-center h-screen bg-gradient-to-bl from-indigo-900 to-teal-500">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-                <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">Login</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2" htmlFor="username">
-                            Username
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            placeholder="Username"
+        <Box
+            sx={{
+                minHeight: '100vh',
+                bgcolor: 'background.default',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                p: 2
+            }}
+        >
+            <Paper
+                elevation={8}
+                sx={{
+                    width: '100%',
+                    maxWidth: 400,
+                    bgcolor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 2,
+                }}
+            >
+                <Box sx={{ p: 4 }}>
+                    <Typography
+                        variant="h4"
+                        align="center"
+                        sx={{
+                            color: 'primary.main',
+                            mb: 2,
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Scriptorium
+                    </Typography>
+
+                    <Typography
+                        variant="h6"
+                        align="center"
+                        sx={{
+                            color: 'text.primary',
+                            mb: 4
+                        }}
+                    >
+                        Sign In
+                    </Typography>
+
+                    <Box component="form" onSubmit={handleSubmit}>
+                        <TextField
+                            fullWidth
+                            label="Username"
+                            variant="outlined"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={isLoading}
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            color="primary"
+                            sx={{
+                                mb: 3,
+                                '& .MuiOutlinedInput-root': {
+                                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.8)' : 'background.default',
+                                    '&:hover': {
+                                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.6)' : 'action.hover',
+                                    },
+                                    '& fieldset': {
+                                        borderColor: 'divider',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'primary.main',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'primary.main',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                    '&.Mui-focused': {
+                                        color: 'primary.main',
+                                    },
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: 'text.primary',
+                                },
+                            }}
                         />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 font-medium mb-2" htmlFor="password">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            placeholder="Password"
+
+                        <TextField
+                            fullWidth
+                            label="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            variant="outlined"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={isLoading}
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            color="primary"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={togglePasswordVisibility}
+                                            edge="end"
+                                            disabled={isLoading}
+                                            sx={{ color: 'text.secondary' }}
+                                        >
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{
+                                mb: 3,
+                                '& .MuiOutlinedInput-root': {
+                                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.8)' : 'background.default',
+                                    '&:hover': {
+                                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.6)' : 'action.hover',
+                                    },
+                                    '& fieldset': {
+                                        borderColor: 'divider',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'primary.main',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'primary.main',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'text.secondary',
+                                    '&.Mui-focused': {
+                                        color: 'primary.main',
+                                    },
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: 'text.primary',
+                                },
+                            }}
                         />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-blue-400"
-                    >
-                        {isLoading ? 'Logging in...' : 'Login'}
-                    </button>
-                </form>
-                {error && (
-                    <div className="mt-4 relative">
-                        <ErrorBox errorMessage={error} />
-                        <button
-                            onClick={() => setError(null)}
-                            className="absolute top-0 right-0 mt-1 mr-1 text-gray-500 hover:text-gray-700"
+
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={isLoading}
+                            sx={{
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                                '&:disabled': {
+                                    bgcolor: 'action.disabledBackground',
+                                },
+                                height: 48,
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                mb: 3,
+                            }}
+                            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
                         >
-                            &times;
-                        </button>
-                    </div>
-                )}
-                <p className="text-center text-gray-600 mt-4">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/auth/signup" className="text-blue-500 hover:underline">
-                        Sign up
-                    </Link>
-                </p>
-            </div>
-        </div>
+                            {isLoading ? 'Signing In...' : 'Sign In'}
+                        </Button>
+                    </Box>
+
+                    {error && (
+                        <Alert
+                            severity="error"
+                            sx={{
+                                mb: 3,
+                                bgcolor: theme.palette.mode === 'dark'
+                                    ? 'rgba(127, 29, 29, 0.1)'
+                                    : 'error.light',
+                                border: '1px solid',
+                                borderColor: 'error.main',
+                                '& .MuiAlert-message': {
+                                    color: theme.palette.mode === 'dark'
+                                        ? 'rgb(248, 113, 113)'
+                                        : 'error.dark',
+                                },
+                                '& .MuiAlert-icon': {
+                                    color: theme.palette.mode === 'dark'
+                                        ? 'rgb(248, 113, 113)'
+                                        : 'error.main',
+                                },
+                            }}
+                            action={
+                                <IconButton
+                                    aria-label="close"
+                                    size="small"
+                                    onClick={() => setError(null)}
+                                    sx={{
+                                        color: theme.palette.mode === 'dark'
+                                            ? 'rgb(248, 113, 113)'
+                                            : 'error.main'
+                                    }}
+                                >
+                                    <X size={18} />
+                                </IconButton>
+                            }
+                        >
+                            {error}
+                        </Alert>
+                    )}
+
+                    <Typography
+                        align="center"
+                        sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        Don't have an account?{' '}
+                        <Link
+                            href="/auth/signup"
+                            style={{
+                                color: theme.palette.primary.main,
+                                textDecoration: 'none',
+                                transition: 'color 0.2s ease-in-out',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = theme.palette.primary.light;
+                                e.currentTarget.style.textDecoration = 'underline';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = theme.palette.primary.main;
+                                e.currentTarget.style.textDecoration = 'none';
+                            }}
+                        >
+                            Sign up
+                        </Link>
+                    </Typography>
+                </Box>
+            </Paper>
+        </Box>
     );
 }
