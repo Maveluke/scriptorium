@@ -1,4 +1,4 @@
-import { verifyAccessToken } from "@/utils/auth";
+import { verifyAccessToken } from "../../../../utils/auth";
 import { cookies } from "next/headers";
 import { prisma } from "@/utils/db";
 import { TokenPayload, TokenVerification, User } from "@/app/types/auth";
