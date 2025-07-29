@@ -29,6 +29,8 @@ COPY --from=installer /root/.sdkman/candidates/kotlin /usr/local/kotlin
 ENV PATH="/usr/local/kotlin/bin:${PATH}"
 
 COPY . .
+RUN sed -i 's/\r$//' run.sh && chmod +x run.sh
+
 RUN npx prisma generate
 
 RUN npm run build
@@ -36,6 +38,4 @@ RUN npm run build
 EXPOSE 3000
 ENV NODE_ENV=production
 
-COPY run.sh .
-RUN chmod +x run.sh
 CMD ["./run.sh"]
