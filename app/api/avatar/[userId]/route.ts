@@ -16,10 +16,15 @@ export async function GET(req: NextRequest, { params }: RouteParams): Promise<Re
   try {
     const userId = Number(params.userId);
 
+    if (!userId || userId === undefined || isNaN(Number(userId))) {
+      return new Response('Invalid user ID', { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { avatar: true }
     });
+
 
     if (!user?.avatar) {
       return Response.json({ error: 'Avatar not found' }, { status: 404 });
@@ -27,7 +32,7 @@ export async function GET(req: NextRequest, { params }: RouteParams): Promise<Re
 
     const path = join(process.cwd(), `public/${user.avatar}`);
     const file = await readFile(path);
-    
+
     return new Response(file, {
       headers: {
         'Content-Type': 'image/jpeg',
@@ -47,17 +52,17 @@ export async function POST(req: NextRequest, { params }: RouteParams): Promise<R
 
     const data = await req.formData();
     const file = data.get('image') as File | null;
-    
+
     if (!file) {
       return Response.json({ error: 'No image provided' }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    
+
     const uploadDir = join(process.cwd(), 'public/uploads');
     const fileName = `profile-${userId}.jpg`;
     const path = join(uploadDir, fileName);
-    
+
     await mkdir(uploadDir, { recursive: true });
     await writeFile(path, buffer);
 
@@ -65,7 +70,7 @@ export async function POST(req: NextRequest, { params }: RouteParams): Promise<R
       where: { id: userId },
       data: { avatar: `/uploads/profile-${userId}.jpg` }
     });
-    
+
     return Response.json({ avatar: `/uploads/profile-${userId}.jpg` });
   } catch (e) {
     if (e instanceof ForbiddenError || e instanceof UnauthorizedError) {
@@ -82,7 +87,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams): Promise
     await authorize(req, ['user', 'admin'], userId);
 
     const path = join(process.cwd(), 'public/uploads', `profile-${userId}.jpg`);
-    
+
     await prisma.user.update({
       where: { id: userId },
       data: { avatar: null }
@@ -93,7 +98,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams): Promise
     } catch (e) {
       console.warn(`Could not delete avatar file for user ${userId}:`, e);
     }
-    
+
     return Response.json({ message: 'Avatar deleted' });
   } catch (e) {
     if (e instanceof ForbiddenError || e instanceof UnauthorizedError) {

@@ -58,6 +58,7 @@ async function getTemplates(username: string): Promise<CodeTemplate[]> {
         return [];
     }
 }
+
 // This function runs on the server and fetches user data.
 async function getUserData(username: string): Promise<User | null> {
     try {
@@ -83,7 +84,7 @@ async function getUserData(username: string): Promise<User | null> {
     }
 }
 
-async function getComments(username: string): Promise<Comment[]> {
+async function getComments(username: string): Promise<RawComment[]> {
     try {
         const response = await fetch(`/api/users/comments?username=${username}`, {
             method: 'GET',
@@ -172,6 +173,32 @@ export default function UserProfile({ params }: { params: { username: string } }
 
     const canEdit = currentUser?.username === params.username;
 
+    // Common transition properties
+    const transitionProps = {
+        transition: theme.transitions.create([
+            'background-color',
+            'color',
+            'border-color',
+            'box-shadow'
+        ], {
+            easing: theme.transitions.easing.easeInOut,
+            duration: theme.transitions.duration.standard,
+        }),
+    };
+
+    const elevatedTransitionProps = {
+        transition: theme.transitions.create([
+            'background-color',
+            'color',
+            'border-color',
+            'box-shadow',
+            'transform'
+        ], {
+            easing: theme.transitions.easing.easeInOut,
+            duration: theme.transitions.duration.standard,
+        }),
+    };
+
     useEffect(() => {
         const fetchUserData = async () => {
             setIsLoading(true);
@@ -204,71 +231,6 @@ export default function UserProfile({ params }: { params: { username: string } }
         router.push(`/users/${user?.username}/edit-profile`);
     };
 
-    // const handleVote = async (postId: number, isUpvote: boolean) => {
-    //     if (postId === null) {
-    //         showToast({
-    //             message: 'Failed to submit vote - Please refresh your page',
-    //             type: 'error'
-    //         });
-    //         return;
-    //     }
-
-    //     if (!user || !accessToken) {
-    //         showToast({
-    //             message: 'Please log in to vote',
-    //             type: 'info'
-    //         });
-    //         router.push('/auth/login');
-    //         return;
-    //     }
-
-    //     const vote = isUpvote ? 1 : -1;
-    //     let newVote = 0;
-    //     const previousPosts = blogPosts;
-
-    //     setBlogPosts(prevPosts =>
-    //         prevPosts.map(post => {
-    //             if (post.id === postId) {
-    //                 newVote = post.userVote === vote ? 0 : vote;
-    //                 return {
-    //                     ...post,
-    //                     score: post.score + newVote - post.userVote,
-    //                     userVote: newVote
-    //                 };
-    //             }
-    //             return post;
-    //         })
-    //     );
-
-    //     try {
-    //         await sendVote(newVote, postId);
-    //         showToast({
-    //             message: newVote === 0 ? 'Vote removed' : isUpvote ? 'Upvoted' : 'Downvoted',
-    //             type: 'success'
-    //         });
-    //     } catch (err) {
-    //         setBlogPosts(previousPosts);
-    //         throw err;
-    //     }
-    // };
-
-    // const sendVote = async (vote: number, postId: number) => {
-    //     const method = vote === 0 ? 'DELETE' : 'POST';
-    //     const url = '/api/rate/post';
-    //     const options: RequestInit = {
-    //         method: method,
-    //         credentials: 'include',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'access-token': `Bearer ${accessToken}`,
-    //         },
-    //         body: JSON.stringify({
-    //             userId: user!.id,
-    //             postId: postId,
-    //             value: vote
-    //         }),
-    //     };
-
     if (isLoading) {
         return (
             <Box
@@ -277,7 +239,8 @@ export default function UserProfile({ params }: { params: { username: string } }
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: 'background.default'
+                    bgcolor: 'background.default',
+                    ...transitionProps,
                 }}
             >
                 <CircularProgress size={60} />
@@ -293,7 +256,8 @@ export default function UserProfile({ params }: { params: { username: string } }
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: 'background.default'
+                    bgcolor: 'background.default',
+                    ...transitionProps,
                 }}
             >
                 <Typography variant="h6" color="text.secondary">
@@ -302,6 +266,28 @@ export default function UserProfile({ params }: { params: { username: string } }
             </Box>
         );
     }
+
+    const renderUserProfile = (comment: RawComment) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <UserAvatar
+                username={comment.author?.username || ""}
+                userId={comment.id}
+                size={32}
+                clickable={false}
+            />
+            <Typography
+                variant="subtitle2"
+                sx={{
+                    ml: 1,
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    ...transitionProps,
+                }}
+            >
+                {comment.author?.username || ""}
+            </Typography>
+        </Box>
+    );
 
     const NoDataMessage = ({ type }: { type: 'templates' | 'comments' | 'posts' }) => (
         <Box
@@ -312,6 +298,7 @@ export default function UserProfile({ params }: { params: { username: string } }
                 justifyContent: 'center',
                 py: 8,
                 textAlign: 'center',
+                ...transitionProps,
             }}
         >
             {type === 'templates' ? (
@@ -321,10 +308,19 @@ export default function UserProfile({ params }: { params: { username: string } }
             ) : (
                 <BookOpen className="w-16 h-16 mb-4 text-gray-400" />
             )}
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+            <Typography
+                variant="h6"
+                color="text.secondary"
+                gutterBottom
+                sx={transitionProps}
+            >
                 No {type} yet
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={transitionProps}
+            >
                 {type === 'templates'
                     ? 'This user hasn\'t created any templates yet.'
                     : type === 'comments'
@@ -335,8 +331,13 @@ export default function UserProfile({ params }: { params: { username: string } }
     );
 
     return (
-        <BaseLayoutProfile user={user}>
-            <Box sx={{ maxWidth: '1200px', margin: '0 auto', p: 3 }}>
+        <BaseLayoutProfile user={currentUser}>
+            <Box sx={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                p: 3,
+                ...transitionProps,
+            }}>
                 <Grid container spacing={4}>
                     {/* Profile Card */}
                     <Grid item xs={12} md={6}>
@@ -348,24 +349,52 @@ export default function UserProfile({ params }: { params: { username: string } }
                                 borderColor: 'divider',
                                 borderRadius: 2,
                                 overflow: 'hidden',
+                                ...elevatedTransitionProps,
+                                '&:hover': {
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: theme.shadows[12],
+                                },
                             }}
                         >
                             <Box sx={{ p: 4 }}>
                                 {/* User Header */}
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-                                    <UserProfileAvatar username={user.username} userId={user.id} />
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    mb: 4,
+                                    ...transitionProps,
+                                }}>
+                                    <Box sx={{
+                                        ...elevatedTransitionProps,
+                                        '&:hover': {
+                                            transform: 'scale(1.05)',
+                                        },
+                                    }}>
+                                        <UserAvatar
+                                            username={user.username}
+                                            userId={user.id}
+                                            size={200}
+                                        />
+                                    </Box>
                                     <Typography
                                         variant="h4"
                                         sx={{
                                             color: 'primary.main',
                                             fontWeight: 'bold',
                                             mt: 2,
-                                            mb: 1
+                                            mb: 1,
+                                            ...transitionProps,
                                         }}
                                     >
                                         {user.firstname} {user.lastname}
                                     </Typography>
-                                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                                    <Typography
+                                        variant="h6"
+                                        color="text.secondary"
+                                        gutterBottom
+                                        sx={transitionProps}
+                                    >
                                         @{user.username}
                                     </Typography>
 
@@ -377,8 +406,11 @@ export default function UserProfile({ params }: { params: { username: string } }
                                             sx={{
                                                 mt: 2,
                                                 bgcolor: 'primary.main',
+                                                ...elevatedTransitionProps,
                                                 '&:hover': {
                                                     bgcolor: 'primary.dark',
+                                                    transform: 'translateY(-1px)',
+                                                    boxShadow: theme.shadows[8],
                                                 },
                                             }}
                                         >
@@ -387,11 +419,20 @@ export default function UserProfile({ params }: { params: { username: string } }
                                     )}
                                 </Box>
 
-                                <Divider sx={{ mb: 3 }} />
+                                <Divider sx={{
+                                    mb: 3,
+                                    borderColor: 'divider',
+                                    ...transitionProps,
+                                }} />
 
                                 {/* About Section */}
                                 <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" color="primary.main" gutterBottom>
+                                    <Typography
+                                        variant="h6"
+                                        color="primary.main"
+                                        gutterBottom
+                                        sx={transitionProps}
+                                    >
                                         About Me
                                     </Typography>
                                     <Chip
@@ -400,13 +441,22 @@ export default function UserProfile({ params }: { params: { username: string } }
                                             bgcolor: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.light',
                                             color: theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark',
                                             fontWeight: 500,
+                                            ...elevatedTransitionProps,
+                                            '&:hover': {
+                                                transform: 'scale(1.02)',
+                                            },
                                         }}
                                     />
                                 </Box>
 
                                 {/* Role Section */}
                                 <Box sx={{ mb: 3 }}>
-                                    <Typography variant="h6" color="primary.main" gutterBottom>
+                                    <Typography
+                                        variant="h6"
+                                        color="primary.main"
+                                        gutterBottom
+                                        sx={transitionProps}
+                                    >
                                         Role
                                     </Typography>
                                     <Chip
@@ -416,36 +466,80 @@ export default function UserProfile({ params }: { params: { username: string } }
                                         sx={{
                                             borderColor: 'primary.main',
                                             color: 'primary.main',
+                                            ...elevatedTransitionProps,
+                                            '&:hover': {
+                                                bgcolor: 'rgba(37, 99, 235, 0.1)',
+                                                transform: 'scale(1.02)',
+                                            },
                                         }}
                                     />
                                 </Box>
 
                                 {/* Contact Information */}
                                 <Box>
-                                    <Typography variant="h6" color="primary.main" gutterBottom>
+                                    <Typography
+                                        variant="h6"
+                                        color="primary.main"
+                                        gutterBottom
+                                        sx={transitionProps}
+                                    >
                                         Contact Information
                                     </Typography>
                                     <List dense>
-                                        <ListItem>
+                                        <ListItem sx={{
+                                            ...elevatedTransitionProps,
+                                            borderRadius: 1,
+                                            '&:hover': {
+                                                bgcolor: 'action.hover',
+                                                transform: 'translateX(4px)',
+                                            },
+                                        }}>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                                                <Avatar sx={{
+                                                    bgcolor: 'primary.main',
+                                                    width: 32,
+                                                    height: 32,
+                                                    ...transitionProps,
+                                                }}>
                                                     <Mail size={16} />
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
                                                 primary={user.email}
-                                                sx={{ '& .MuiListItemText-primary': { color: 'text.primary' } }}
+                                                sx={{
+                                                    '& .MuiListItemText-primary': {
+                                                        color: 'text.primary',
+                                                        ...transitionProps,
+                                                    }
+                                                }}
                                             />
                                         </ListItem>
-                                        <ListItem>
+                                        <ListItem sx={{
+                                            ...elevatedTransitionProps,
+                                            borderRadius: 1,
+                                            '&:hover': {
+                                                bgcolor: 'action.hover',
+                                                transform: 'translateX(4px)',
+                                            },
+                                        }}>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                                                <Avatar sx={{
+                                                    bgcolor: 'primary.main',
+                                                    width: 32,
+                                                    height: 32,
+                                                    ...transitionProps,
+                                                }}>
                                                     <Phone size={16} />
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
                                                 primary={user.phoneNumber}
-                                                sx={{ '& .MuiListItemText-primary': { color: 'text.primary' } }}
+                                                sx={{
+                                                    '& .MuiListItemText-primary': {
+                                                        color: 'text.primary',
+                                                        ...transitionProps,
+                                                    }
+                                                }}
                                             />
                                         </ListItem>
                                     </List>
@@ -464,6 +558,11 @@ export default function UserProfile({ params }: { params: { username: string } }
                                 borderColor: 'divider',
                                 borderRadius: 2,
                                 minHeight: '500px',
+                                ...elevatedTransitionProps,
+                                '&:hover': {
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: theme.shadows[12],
+                                },
                             }}
                         >
                             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -473,12 +572,18 @@ export default function UserProfile({ params }: { params: { username: string } }
                                     sx={{
                                         '& .MuiTab-root': {
                                             color: 'text.secondary',
+                                            ...elevatedTransitionProps,
                                             '&.Mui-selected': {
                                                 color: 'primary.main',
+                                            },
+                                            '&:hover': {
+                                                color: 'primary.light',
+                                                transform: 'translateY(-1px)',
                                             },
                                         },
                                         '& .MuiTabs-indicator': {
                                             backgroundColor: 'primary.main',
+                                            ...transitionProps,
                                         },
                                     }}
                                 >
@@ -504,13 +609,29 @@ export default function UserProfile({ params }: { params: { username: string } }
                             </Box>
 
                             <TabPanel value={tabValue} index={0}>
-                                <Box sx={{ maxHeight: 400, overflow: 'auto', px: 2 }}>
+                                <Box sx={{
+                                    maxHeight: 400,
+                                    overflow: 'auto',
+                                    px: 2,
+                                    ...transitionProps,
+                                }}>
                                     {templates.length === 0 ? (
                                         <NoDataMessage type="templates" />
                                     ) : (
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            {templates.map((template) => (
-                                                <TemplateCard key={template.id} template={template} />
+                                            {templates.map((template, index) => (
+                                                <Box
+                                                    key={template.id}
+                                                    sx={{
+                                                        ...elevatedTransitionProps,
+                                                        '&:hover': {
+                                                            transform: 'translateX(4px)',
+                                                        },
+                                                        animationDelay: `${index * 0.1}s`,
+                                                    }}
+                                                >
+                                                    <TemplateCard template={template} />
+                                                </Box>
                                             ))}
                                         </Box>
                                     )}
@@ -518,18 +639,33 @@ export default function UserProfile({ params }: { params: { username: string } }
                             </TabPanel>
 
                             <TabPanel value={tabValue} index={1}>
-                                <Box sx={{ maxHeight: 400, overflow: 'auto', px: 2 }}>
+                                <Box sx={{
+                                    maxHeight: 400,
+                                    overflow: 'auto',
+                                    px: 2,
+                                    ...transitionProps,
+                                }}>
                                     {blogPosts.length === 0 ? (
                                         <NoDataMessage type="posts" />
                                     ) : (
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            {blogPosts.map((post) => (
-                                                <PostPreview
+                                            {blogPosts.map((post, index) => (
+                                                <Box
                                                     key={post.id}
-                                                    post={post}
-                                                    handleVote={() => { return Promise.resolve() }} // Disable voting in profile view
-                                                    handleReportClick={() => { }} // Disable reporting in profile view
-                                                />
+                                                    sx={{
+                                                        ...elevatedTransitionProps,
+                                                        '&:hover': {
+                                                            transform: 'translateX(4px)',
+                                                        },
+                                                        animationDelay: `${index * 0.1}s`,
+                                                    }}
+                                                >
+                                                    <PostPreview
+                                                        post={post}
+                                                        handleVote={() => { return Promise.resolve() }}
+                                                        handleReportClick={() => { }}
+                                                    />
+                                                </Box>
                                             ))}
                                         </Box>
                                     )}
@@ -537,12 +673,17 @@ export default function UserProfile({ params }: { params: { username: string } }
                             </TabPanel>
 
                             <TabPanel value={tabValue} index={2}>
-                                <Box sx={{ maxHeight: 400, overflow: 'auto', px: 2 }}>
+                                <Box sx={{
+                                    maxHeight: 400,
+                                    overflow: 'auto',
+                                    px: 2,
+                                    ...transitionProps,
+                                }}>
                                     {comments.length === 0 ? (
                                         <NoDataMessage type="comments" />
                                     ) : (
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            {comments.map((comment) => (
+                                            {comments.map((comment, index) => (
                                                 <Card
                                                     key={comment.id}
                                                     variant="outlined"
@@ -550,28 +691,23 @@ export default function UserProfile({ params }: { params: { username: string } }
                                                         bgcolor: 'background.default',
                                                         border: '1px solid',
                                                         borderColor: 'divider',
+                                                        ...elevatedTransitionProps,
+                                                        animationDelay: `${index * 0.1}s`,
+                                                        '&:hover': {
+                                                            transform: 'translateX(4px)',
+                                                            boxShadow: theme.shadows[4],
+                                                        },
                                                     }}
                                                 >
                                                     <CardContent sx={{ pb: 2 }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                            <UserAvatar
-                                                                username={comment.author?.username || ""}
-                                                                userId={comment.id}
-                                                                size={32}
-                                                            />
-                                                            <Typography
-                                                                variant="subtitle2"
-                                                                sx={{ ml: 1, fontWeight: 600, color: 'text.primary' }}
-                                                            >
-                                                                {comment.author?.username || ""}
-                                                            </Typography>
-                                                        </Box>
+                                                        {renderUserProfile(comment)}
                                                         <Typography
                                                             variant="body2"
                                                             sx={{
                                                                 color: 'text.secondary',
                                                                 ml: 5,
-                                                                lineHeight: 1.5
+                                                                lineHeight: 1.5,
+                                                                ...transitionProps,
                                                             }}
                                                         >
                                                             {comment.content}

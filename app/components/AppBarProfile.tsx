@@ -17,11 +17,11 @@ import ThemeToggle from "@/app/components/ThemeToggle";
 import { User } from "@/app/types/auth";
 
 interface AppBarProps {
-  user: User;
+  user: User | null;
   onMenuClick: () => void;
 }
 
-export default function AppBarProfile({user, onMenuClick }: AppBarProps) {
+export default function AppBarProfile({ user, onMenuClick }: AppBarProps) {
   const { theme, isDarkMode } = useTheme();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 640px)');
@@ -36,9 +36,8 @@ export default function AppBarProfile({user, onMenuClick }: AppBarProps) {
         <UserAvatar username={user.username} userId={user.id} />
         <Link href={`/users/${user.username}`}>
           <Typography
-            className={`hidden sm:block hover:text-blue-400 ${
-              isDarkMode ? 'text-slate-200' : 'text-slate-700'
-            }`}
+            className={`hidden sm:block hover:text-blue-400 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'
+              }`}
           >
             {user.username}
           </Typography>
@@ -93,7 +92,7 @@ export default function AppBarProfile({user, onMenuClick }: AppBarProps) {
               <Avatar
                 src="/favicon.ico"
                 alt="Scriptorium"
-                />
+              />
               <Typography
                 variant="h5"
                 className="text-lg sm:text-xl md:text-2xl content-center text-blue-600 flex-shrink-0"
