@@ -1,6 +1,8 @@
 ## Running the code locally
 
-First, run the startup file:
+First make sure your Docker Desktop is up and running in the background
+
+Then, run the startup file:
 
 ```bash
 ./startup.sh
