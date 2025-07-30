@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     gcc \
     g++ \
-    docker.io \
+    # docker.io \
     curl \
     zip \
     unzip \
@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     gcc \
     g++ \
-    docker.io \
+    # docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Java runtime (smaller than full JDK)
