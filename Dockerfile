@@ -1,68 +1,75 @@
 # Stage 1: Build environment with all tools
-FROM node:20-bullseye AS installer
+# FROM node:20-bullseye AS installer
+# WORKDIR /app
+
+# # Install build dependencies
+# RUN apt-get update && apt-get install -y \
+#     python3 \
+#     gcc \
+#     g++ \
+#     # docker.io \
+#     curl \
+#     zip \
+#     unzip \
+#     && rm -rf /var/lib/apt/lists/*
+
+# # Install Java and Kotlin
+# COPY --from=openjdk:17-jdk-alpine /opt/openjdk-17 /usr/java/openjdk-17
+# ENV JAVA_HOME=/usr/java/openjdk-17
+# ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# RUN curl -s https://get.sdkman.io | bash \
+#     && bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin"
+
+# # Install ALL dependencies (including dev)
+# COPY package*.json ./
+# RUN npm install
+
+# # Copy source and build
+# COPY . .
+# RUN npx prisma generate
+# RUN npm run build
+
+# Production runtime with pre-built files
+FROM node:20-bullseye as release
 WORKDIR /app
 
-# Install build dependencies
+# Install system dependencies (Python, GCC, G++)
 RUN apt-get update && apt-get install -y \
     python3 \
     gcc \
     g++ \
-    # docker.io \
     curl \
     zip \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Java and Kotlin
+# Install Java 17
 COPY --from=openjdk:17-jdk-alpine /opt/openjdk-17 /usr/java/openjdk-17
 ENV JAVA_HOME=/usr/java/openjdk-17
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
+# Install Kotlin
 RUN curl -s https://get.sdkman.io | bash \
-    && bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin"
+    && bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin" \
+    && cp -r $HOME/.sdkman/candidates/kotlin/current/* /usr/local/ \
+    && rm -rf $HOME/.sdkman
+ENV PATH="/usr/local/bin:${PATH}"
 
-# Install ALL dependencies (including dev)
-COPY package*.json ./
-RUN npm install
-
-# Copy source and build
-COPY . .
-RUN npx prisma generate
-RUN npm run build
-
-# Stage 2: Production runtime (OPTIMIZED)
-FROM node:20-bullseye AS release
-WORKDIR /app
-
-# Install ONLY runtime system dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    gcc \
-    g++ \
-    # docker.io \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Java runtime (smaller than full JDK)
-COPY --from=openjdk:17-jdk-alpine /opt/openjdk-17 /usr/java/openjdk-17
-ENV JAVA_HOME=/usr/java/openjdk-17
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Copy only Kotlin runtime
-COPY --from=installer /root/.sdkman/candidates/kotlin /usr/local/kotlin
-ENV PATH="/usr/local/kotlin/bin:${PATH}"
-
-# Install ONLY production dependencies
+# Copy package files and install ONLY production dependencies
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy ONLY built files and runtime necessities
-COPY --from=installer /app/.next ./.next
-COPY --from=installer /app/public ./public
-COPY --from=installer /app/prisma/schema.prisma ./prisma/
-COPY --from=installer /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=installer /app/run.sh ./
+# Copy pre-built Next.js files (build these locally first!)
+COPY .next ./.next
+COPY public ./public
 
-# Fix line endings and permissions
+# Copy Prisma schema and generate client
+COPY prisma/schema.prisma ./prisma/
+RUN npx prisma generate
+
+# Copy your run script
+COPY run.sh ./
 RUN sed -i 's/\r$//' run.sh && chmod +x run.sh
 
 # Configuration
