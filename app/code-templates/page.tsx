@@ -41,7 +41,7 @@ export default function CodeTemplates() {
         },
       });
       const data = await response.json();
-      
+
       if (data.status === "error") {
         console.error(data.message);
         setError(data.message);
@@ -72,19 +72,19 @@ export default function CodeTemplates() {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Fixed header */}
-      <AppBar 
-        position="fixed" 
+      <AppBar
+        position="fixed"
         className="bg-slate-800 border-b border-slate-700"
         sx={{ boxShadow: 'none' }}
       >
         <div className="p-3 flex flex-col sm:flex-row items-center gap-3">
-          <Typography 
-            className="text-xl sm:text-2xl text-blue-400 flex-shrink-0" 
+          <Typography
+            className="text-xl sm:text-2xl text-blue-400 flex-shrink-0"
             variant="h5"
           >
             Scriptorium
           </Typography>
-          <TextField 
+          <TextField
             className="w-full"
             color="info"
             variant="outlined"
@@ -99,7 +99,7 @@ export default function CodeTemplates() {
               },
             }}
           />
-          <Button 
+          <Button
             className="bg-blue-600 hover:bg-blue-700 px-6 min-w-[100px] whitespace-nowrap h-9"
             variant="contained"
             size="small"
@@ -113,11 +113,10 @@ export default function CodeTemplates() {
       <div className="pt-16"> {/* Matches header height */}
         <div className="flex relative">
           {/* Overlay */}
-          <div 
+          <div
             onClick={toggleSidebar}
-            className={`fixed inset-0 bg-black transition-opacity duration-300 ${
-              sideBarState ? "opacity-50 visible" : "opacity-0 invisible"
-            } md:hidden`}
+            className={`fixed inset-0 bg-black transition-opacity duration-300 ${sideBarState ? "opacity-50 visible" : "opacity-0 invisible"
+              } md:hidden`}
           />
 
           {/* Sidebar */}
@@ -143,15 +142,15 @@ export default function CodeTemplates() {
                   },
                 }}
               />
-              
+
               <Typography variant="h6" className="mb-2 text-blue-400">
                 Tags
               </Typography>
-              
+
               <FormGroup className="flex-1 overflow-y-auto p-2 border border-slate-700 rounded bg-slate-900/50">
-                <FormControlLabel 
+                <FormControlLabel
                   control={
-                    <Checkbox 
+                    <Checkbox
                       sx={{
                         color: 'rgb(96, 165, 250)',
                         '&.Mui-checked': {
@@ -159,12 +158,12 @@ export default function CodeTemplates() {
                         },
                       }}
                     />
-                  } 
-                  label="React" 
+                  }
+                  label="React"
                 />
-                <FormControlLabel 
+                <FormControlLabel
                   control={
-                    <Checkbox 
+                    <Checkbox
                       sx={{
                         color: 'rgb(96, 165, 250)',
                         '&.Mui-checked': {
@@ -172,12 +171,12 @@ export default function CodeTemplates() {
                         },
                       }}
                     />
-                  } 
-                  label="TypeScript" 
+                  }
+                  label="TypeScript"
                 />
-                <FormControlLabel 
+                <FormControlLabel
                   control={
-                    <Checkbox 
+                    <Checkbox
                       sx={{
                         color: 'rgb(96, 165, 250)',
                         '&.Mui-checked': {
@@ -185,12 +184,12 @@ export default function CodeTemplates() {
                         },
                       }}
                     />
-                  } 
-                  label="Next.js" 
+                  }
+                  label="Next.js"
                 />
-                <FormControlLabel 
+                <FormControlLabel
                   control={
-                    <Checkbox 
+                    <Checkbox
                       sx={{
                         color: 'rgb(96, 165, 250)',
                         '&.Mui-checked': {
@@ -198,12 +197,12 @@ export default function CodeTemplates() {
                         },
                       }}
                     />
-                  } 
-                  label="Tailwind" 
+                  }
+                  label="Tailwind"
                 />
-                <FormControlLabel 
+                <FormControlLabel
                   control={
-                    <Checkbox 
+                    <Checkbox
                       sx={{
                         color: 'rgb(96, 165, 250)',
                         '&.Mui-checked': {
@@ -211,14 +210,14 @@ export default function CodeTemplates() {
                         },
                       }}
                     />
-                  } 
-                  label="Material UI" 
+                  }
+                  label="Material UI"
                 />
               </FormGroup>
             </div>
 
             {/* Mobile toggle button */}
-            <button 
+            <button
               onClick={toggleSidebar}
               className="absolute right-0 top-1/2 translate-x-full bg-slate-800 p-2 rounded-r-xl md:hidden hover:bg-slate-700"
             >
@@ -233,7 +232,7 @@ export default function CodeTemplates() {
                 <Typography className="text-red-500">{error}</Typography>
               </div>
             )}
-            
+
             <InfiniteScroll
               dataLength={codeTemplates.length}
               next={fetchCodeTemplates}
